@@ -1,51 +1,22 @@
-import React, { useState } from 'react';
-type Props={rows:Record<string,any>[];hidden:Record<string,boolean>;};
-
-function safeRender(val:any):string|number{
-  if(val===null||val===undefined) return '—';
-  if(typeof val==='object'){
-    if('goals' in val && typeof (val as any).goals==='number') return (val as any).goals;
-    try{return JSON.stringify(val);}catch{return '[object]';}
-  }
-  return val;
-}
-
-function getCellStyle(column:string):React.CSSProperties{
-  if(column.startsWith('Blocked Value')||column.startsWith('Blocked\nAcum')) {
-    return {background:'#3a380f', textAlign:'center'};
-  }
-  if(column.startsWith('Speed Blocked')) {
-    return {background:'#2b2a12', textAlign:'center'};
-  }
-  return { textAlign: 'center' };
-}
-
 export default function DataTable({rows,hidden}:Props){
   const [sortCol,setSortCol] = useState<string|null>(null);
   const [sortDir,setSortDir] = useState<'asc'|'desc'>('asc');
 
   if(!rows.length) return <div>No fixtures in play.</div>;
 
-  
   // Build all columns
   let cols = Object.keys(rows[0]).filter(c => c === 'Period' || !hidden[c]);
 
-  // Force WPI placement after Speed
-Acum and before Blocked Value
-Home
-  const idx = cols.indexOf("Speed
-Acum");
+  // Force WPI placement (after Speed\nAcum, before Blocked Value\nHome)
+  const idx = cols.indexOf("Speed\nAcum");
   if (idx !== -1) {
-    cols = cols.filter(c => c !== "WPI
-Home" && c !== "WPI
-Away");
-    cols.splice(idx + 1, 0, "WPI
-Home", "WPI
-Away");
+    // remove existing if present
+    cols = cols.filter(c => c !== "WPI\nHome" && c !== "WPI\nAway");
+    // insert after Speed\nAcum
+    cols.splice(idx + 1, 0, "WPI\nHome", "WPI\nAway");
   }
 
   const columns = cols;
-
 
   function handleSort(col:string){
     if(sortCol===col){
@@ -84,44 +55,4 @@ Away");
                   position:'sticky',
                   top:0,
                   background:'#12172a',
-                  color:'#9aa4c7',
-                  padding:'6px',
-                  textAlign:'center',
-                  cursor:'pointer'
-                }}
-              >
-                {c.split('\n').map((l,i)=>(<div key={i}>{l}</div>))}
-                {sortCol===c && (sortDir==='asc'?' ▲':' ▼')}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {sortedRows.map((row,i)=>(
-            <tr
-              key={i}
-              style={{
-                cursor: 'pointer',
-                transition: 'background 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#1f2937'; // highlight row
-                e.currentTarget.style.boxShadow = 'inset 0 0 8px rgba(0,0,0,0.6)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '';
-                e.currentTarget.style.boxShadow = '';
-              }}
-            >
-              {columns.map(c=>(
-                <td key={c} style={{padding:'6px',borderBottom:'1px solid #333',...getCellStyle(c)}}>
-                  {safeRender(row[c])}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
+                  color
